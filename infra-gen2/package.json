@@ -12,6 +12,7 @@
     "backends/storage/*"
   ],
   "dependencies": {
+    "@aws-crypto/client-node": "^4.0.0",
     "aws-amplify": "^6.3.6",
     "infra-common": "1.0.0"
   },
