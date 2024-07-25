@@ -1,327 +1,125 @@
-// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-// SPDX-License-Identifier: Apache-2.0
-
-import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
-import 'package:amplify_authenticator/amplify_authenticator.dart';
-import 'package:amplify_core/amplify_core.dart';
-import 'package:amplify_secure_storage/amplify_secure_storage.dart';
-import 'package:amplify_storage_s3/amplify_storage_s3.dart';
-import 'package:amplify_storage_s3_example/amplifyconfiguration.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:path_provider/path_provider.dart';
-
-final AmplifyLogger _logger = AmplifyLogger('MyStorageApp');
 
 void main() {
-  AmplifyLogger().logLevel = LogLevel.debug;
-  runApp(
-    const MyApp(
-      title: 'Amplify Storage Example',
-    ),
-  );
+  runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key, required this.title});
-
-  final String title;
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   // This widget is the root of your application.
   @override
-  State<MyApp> createState() => _MyAppState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        // This is the theme of your application.
+        //
+        // TRY THIS: Try running your application with "flutter run". You'll see
+        // the application has a purple toolbar. Then, without quitting the app,
+        // try changing the seedColor in the colorScheme below to Colors.green
+        // and then invoke "hot reload" (save your changes or press the "hot
+        // reload" button in a Flutter-supported IDE, or press "r" if you used
+        // the command line to start the app).
+        //
+        // Notice that the counter didn't reset back to zero; the application
+        // state is not lost during the reload. To reset the state, use hot
+        // restart instead.
+        //
+        // This works for code too, not just values: Most code changes can be
+        // tested with just a hot reload.
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+    );
+  }
 }
 
-class _MyAppState extends State<MyApp> {
-  static final _router = GoRouter(
-    routes: [
-      GoRoute(
-        path: '/',
-        builder: (BuildContext _, GoRouterState __) => const HomeScreen(),
-      ),
-    ],
-  );
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key, required this.title});
+
+  // This widget is the home page of your application. It is stateful, meaning
+  // that it has a State object (defined below) that contains fields that affect
+  // how it looks.
+
+  // This class is the configuration for the state. It holds the values (in this
+  // case the title) provided by the parent (in this case the App widget) and
+  // used by the build method of the State. Fields in a Widget subclass are
+  // always marked "final".
+
+  final String title;
 
   @override
-  void initState() {
-    super.initState();
-    configureAmplify();
-  }
+  State<MyHomePage> createState() => _MyHomePageState();
+}
 
-  Future<void> configureAmplify() async {
-    final auth = AmplifyAuthCognito(
-      // FIXME: In your app, make sure to remove this line and set up
-      /// Keychain Sharing in Xcode as described in the docs:
-      /// https://docs.amplify.aws/lib/project-setup/platform-setup/q/platform/flutter/#enable-keychain
-      secureStorageFactory: AmplifySecureStorage.factoryFrom(
-        macOSOptions:
-            // ignore: invalid_use_of_visible_for_testing_member
-            MacOSSecureStorageOptions(useDataProtection: false),
-      ),
-    );
-    final storage = AmplifyStorageS3();
+class _MyHomePageState extends State<MyHomePage> {
+  int _counter = 0;
 
-    try {
-      await Amplify.addPlugins([auth, storage]);
-      await Amplify.configure(amplifyconfig);
-      _logger.debug('Successfully configured Amplify');
-    } on Exception catch (error) {
-      _logger.error('Something went wrong configuring Amplify: $error');
-    }
+  void _incrementCounter() {
+    setState(() {
+      // This call to setState tells the Flutter framework that something has
+      // changed in this State, which causes it to rerun the build method below
+      // so that the display can reflect the updated values. If we changed
+      // _counter without calling setState(), then the build method would not be
+      // called again, and so nothing would appear to happen.
+      _counter++;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Authenticator(
-      preferPrivateSession: true,
-      child: MaterialApp.router(
-        title: 'Flutter Demo',
-        builder: Authenticator.builder(),
-        theme: ThemeData.light(useMaterial3: true),
-        darkTheme: ThemeData.dark(useMaterial3: true),
-        routeInformationParser: _router.routeInformationParser,
-        routerDelegate: _router.routerDelegate,
-        debugShowCheckedModeBanner: false,
-      ),
-    );
-  }
-}
-
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  List<StorageItem> list = [];
-  var imageUrl = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _checkAuthStatus();
-    _listAllPublicFiles();
-  }
-
-  // sign out of the app
-  Future<void> _signOut() async {
-    try {
-      await Amplify.Auth.signOut();
-      _logger.debug('Signed out');
-    } on AuthException catch (e) {
-      _logger.error('Could not sign out - ${e.message}');
-    }
-  }
-
-  // check if the user is signed in
-  Future<void> _checkAuthStatus() async {
-    try {
-      final session = await Amplify.Auth.fetchAuthSession();
-      _logger.debug('Signed in: ${session.isSignedIn}');
-    } on AuthException catch (e) {
-      _logger.error('Could not check auth status - ${e.message}');
-    }
-  }
-
-  // upload a file to the S3 bucket
-  Future<void> _uploadFile() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-      withReadStream: true,
-      withData: false,
-    );
-
-    if (result == null) {
-      _logger.debug('No file selected');
-      return;
-    }
-
-    final platformFile = result.files.single;
-
-    try {
-      await Amplify.Storage.uploadFile(
-        localFile: AWSFile.fromStream(
-          platformFile.readStream!,
-          size: platformFile.size,
-        ),
-        path: StoragePath.fromString('public/${platformFile.name}'),
-        onProgress: (p) =>
-            _logger.debug('Uploading: ${p.transferredBytes}/${p.totalBytes}'),
-      ).result;
-      await _listAllPublicFiles();
-    } on StorageException catch (e) {
-      _logger.error('Error uploading file - ${e.message}');
-    }
-  }
-
-  // list all files in the S3 bucket
-  Future<void> _listAllPublicFiles() async {
-    try {
-      final result = await Amplify.Storage.list(
-        path: const StoragePath.fromString('public/'),
-        options: const StorageListOptions(
-          pluginOptions: S3ListPluginOptions.listAll(),
-        ),
-      ).result;
-      setState(() {
-        list = result.items;
-      });
-    } on StorageException catch (e) {
-      _logger.error('List error - ${e.message}');
-    }
-  }
-
-  // download file on mobile
-  Future<void> downloadFileMobile(String path) async {
-    final documentsDir = await getApplicationDocumentsDirectory();
-    final filepath = '${documentsDir.path}/$path';
-    try {
-      await Amplify.Storage.downloadFile(
-        path: StoragePath.fromString(path),
-        localFile: AWSFile.fromPath(filepath),
-        onProgress: (p0) => _logger
-            .debug('Progress: ${(p0.transferredBytes / p0.totalBytes) * 100}%'),
-      ).result;
-      await _listAllPublicFiles();
-    } on StorageException catch (e) {
-      _logger.error('Download error - ${e.message}');
-    }
-  }
-
-  // download file on web
-  Future<void> downloadFileWeb(String path) async {
-    try {
-      await Amplify.Storage.downloadFile(
-        path: StoragePath.fromString(path),
-        localFile: AWSFile.fromPath(path),
-        onProgress: (p0) => _logger
-            .debug('Progress: ${(p0.transferredBytes / p0.totalBytes) * 100}%'),
-      ).result;
-      await _listAllPublicFiles();
-    } on StorageException catch (e) {
-      _logger.error('Download error - ${e.message}');
-    }
-  }
-
-  // delete file from S3 bucket
-  Future<void> removeFile(String path) async {
-    try {
-      await Amplify.Storage.remove(
-        path: StoragePath.fromString(path),
-      ).result;
-      setState(() {
-        // set the imageUrl to empty if the deleted file is the one being displayed
-        imageUrl = '';
-      });
-      await _listAllPublicFiles();
-    } on StorageException catch (e) {
-      _logger.error('Delete error - ${e.message}');
-    }
-  }
-
-  // get the url of a file in the S3 bucket
-  Future<String> getUrl(String path) async {
-    try {
-      final result = await Amplify.Storage.getUrl(
-        path: StoragePath.fromString(path),
-        options: const StorageGetUrlOptions(
-          pluginOptions: S3GetUrlPluginOptions(
-            validateObjectExistence: true,
-            expiresIn: Duration(minutes: 1),
-          ),
-        ),
-      ).result;
-      setState(() {
-        imageUrl = result.url.toString();
-      });
-      return result.url.toString();
-    } on StorageException catch (e) {
-      _logger.error('Get URL error - ${e.message}');
-      rethrow;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+    // This method is rerun every time setState is called, for instance as done
+    // by the _incrementCounter method above.
+    //
+    // The Flutter framework has been optimized to make rerunning build methods
+    // fast, so that you can just rebuild anything that needs updating rather
+    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Amplify Storage Example'),
+        // TRY THIS: Try changing the color here to a specific color (to
+        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
+        // change color while the other colors stay the same.
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        // Here we take the value from the MyHomePage object that was created by
+        // the App.build method, and use it to set our appbar title.
+        title: Text(widget.title),
       ),
-      body: Stack(
-        children: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: ListView.builder(
-                itemCount: list.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final item = list[index];
-                  return ListTile(
-                    onTap: () {
-                      getUrl(item.path);
-                    },
-                    title: Text(item.path),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () {
-                        removeFile(item.path);
-                      },
-                      color: Colors.red,
-                    ),
-                    leading: IconButton(
-                      icon: const Icon(Icons.download),
-                      onPressed: () {
-                        zIsWeb
-                            ? downloadFileWeb(item.path)
-                            : downloadFileMobile(item.path);
-                      },
-                    ),
-                  );
-                },
-              ),
+      body: Center(
+        // Center is a layout widget. It takes a single child and positions it
+        // in the middle of the parent.
+        child: Column(
+          // Column is also a layout widget. It takes a list of children and
+          // arranges them vertically. By default, it sizes itself to fit its
+          // children horizontally, and tries to be as tall as its parent.
+          //
+          // Column has various properties to control how it sizes itself and
+          // how it positions its children. Here we use mainAxisAlignment to
+          // center the children vertically; the main axis here is the vertical
+          // axis because Columns are vertical (the cross axis would be
+          // horizontal).
+          //
+          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
+          // action in the IDE, or press "p" in the console), to see the
+          // wireframe for each widget.
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text(
+              'You have pushed the button this many times:',
             ),
-          ),
-          // display the image with the url
-          if (imageUrl != '')
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.all(80),
-                child: Image.network(imageUrl, height: 200),
-              ),
+            Text(
+              '$_counter',
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
-          // upload file button
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: ElevatedButton(
-                onPressed: _uploadFile,
-                child: const Text('Upload File'),
-              ),
-            ),
-          ),
-          // sign out button
-          Align(
-            alignment: Alignment.bottomLeft,
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: ElevatedButton(
-                style: ButtonStyle(
-                  // TODO(Jordan-Nelson): use `WidgetStateProperty` when min flutter sdk is 3.22.0
-                  // ignore: deprecated_member_use
-                  backgroundColor: MaterialStateProperty.all(Colors.red),
-                ),
-                onPressed: _signOut,
-                child: const Icon(Icons.logout, color: Colors.white),
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _incrementCounter,
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
