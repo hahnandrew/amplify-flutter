@@ -1,4 +1,4 @@
-import 'package:amplify_storage_s3_example/common/navigation/router/routes.dart';
+import 'package:amplify_storage_s3_example/features/landing_page/landing_page.dart';
 import 'package:amplify_storage_s3_example/features/trip/ui/edit_trip_page/edit_trip_page.dart';
 import 'package:amplify_storage_s3_example/features/trip/ui/trip_page/trip_page.dart';
 import 'package:amplify_storage_s3_example/features/trip/ui/trips_list/trips_list_page.dart';
@@ -10,12 +10,14 @@ final router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      name: AppRoute.home.name,
+      builder: (context, state) => const LandingPage(),
+    ),
+    GoRoute(
+      path: '/trips',
       builder: (context, state) => const TripsListPage(),
     ),
     GoRoute(
       path: '/trip/:id',
-      name: AppRoute.trip.name,
       builder: (context, state) {
         final tripId = state.pathParameters['id']!;
         return TripPage(tripId: tripId);
@@ -23,7 +25,6 @@ final router = GoRouter(
     ),
     GoRoute(
       path: '/edittrip/:id',
-      name: AppRoute.editTrip.name,
       builder: (context, state) {
         return EditTripPage(
           trip: state.extra! as Trip,
