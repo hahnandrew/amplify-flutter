@@ -1,7 +1,8 @@
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_storage_s3_example/common/navigation/router/routes.dart';
 import 'package:amplify_storage_s3_example/common/ui/bottomsheet_text_form_field.dart';
-import 'package:amplify_storage_s3_example/common/utils/colors.dart' as constants;
+import 'package:amplify_storage_s3_example/common/utils/colors.dart'
+    as constants;
 import 'package:amplify_storage_s3_example/common/utils/date_time_formatter.dart';
 import 'package:amplify_storage_s3_example/features/trip/controller/trip_controller.dart';
 import 'package:amplify_storage_s3_example/models/ModelProvider.dart';
@@ -48,7 +49,7 @@ class EditTripPageState extends ConsumerState<EditTripPage> {
       appBar: AppBar(
         centerTitle: true,
         title: const Text(
-          'Amplify Trips Planner',
+          'Amplify asdfsaTrips Planner',
         ),
         leading: IconButton(
           onPressed: () {

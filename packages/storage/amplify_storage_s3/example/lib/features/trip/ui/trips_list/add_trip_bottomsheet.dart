@@ -39,7 +39,7 @@ class AddTripBottomSheetState extends ConsumerState<AddTripBottomSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             BottomSheetTextFormField(
-              labelText: 'Trip Name',
+              labelText: 'sdafasdfTrip Name',
               controller: tripNameController,
               keyboardType: TextInputType.name,
             ),

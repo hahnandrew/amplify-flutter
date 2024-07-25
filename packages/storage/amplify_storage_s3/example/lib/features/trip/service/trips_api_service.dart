@@ -16,6 +16,7 @@ class TripsAPIService {
   Future<void> fetchAllDevices() async {
     try {
       final devices = await Amplify.Auth.fetchDevices();
+      safePrint('Device: $devices');
       for (final device in devices) {
         safePrint('Device: $device');
       }
@@ -26,8 +27,7 @@ class TripsAPIService {
 
   Future<List<Trip>> getTrips() async {
     try {
-      safePrint('hello world');
-      fetchAllDevices();
+      await fetchAllDevices();
 
       final request = ModelQueries.list(Trip.classType);
       final response = await Amplify.API.query(request: request).response;

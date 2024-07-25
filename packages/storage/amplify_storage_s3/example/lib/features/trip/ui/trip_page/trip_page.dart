@@ -1,5 +1,6 @@
 import 'package:amplify_storage_s3_example/common/navigation/router/routes.dart';
-import 'package:amplify_storage_s3_example/common/utils/colors.dart' as constants;
+import 'package:amplify_storage_s3_example/common/utils/colors.dart'
+    as constants;
 import 'package:amplify_storage_s3_example/features/trip/controller/trip_controller.dart';
 import 'package:amplify_storage_s3_example/features/trip/ui/trip_page/trip_details.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +22,7 @@ class TripPage extends ConsumerWidget {
       appBar: AppBar(
         centerTitle: true,
         title: const Text(
-          'Amplify Trips Planner',
+          'dasfdAmplify Trips Planner',
         ),
         actions: [
           IconButton(
