@@ -236,37 +236,11 @@ class StorageCategory extends AmplifyCategory<StoragePluginInterface> {
   }
 }
 
-/// {@template amplify_core.amplify_storage_category.subpath_strategy}
-/// Configurable options for `Amplify.Storage.list`.
+/// {@template amplify_core.storage.list_category_options}
+/// Category options for `Amplify.Storage.list`.
 /// {@endtemplate}
-class SubpathStrategy with AWSSerializable<Map<String, Object?>> {
-  /// {@macro amplify_core.amplify_storage_category.subpath_strategy}
-  const SubpathStrategy.include() : this._();
-
-  const SubpathStrategy._({
-    this.excludeSubPaths = false,
-    this.delimiter = '/',
-  });
-
-  /// Constructor for SubpathStrategy for excluding subpaths, option to specify the delimiter
-  const SubpathStrategy.exclude({String? delimiter = '/'})
-      : this._(
-          excludeSubPaths: true,
-          delimiter: delimiter ?? '/',
-        );
-
-  /// Whether to exclude objects under the sub paths of the path to list.
-  final bool excludeSubPaths;
-
-  /// The delimiter to use when evaluating sub paths. If [excludeSubPaths] is
-  /// false, this value has no impact on behavior.
-  final String delimiter;
-
-  @override
-  Map<String, Object?> toJson() {
-    return <String, dynamic>{
-      'excludeSubPaths': excludeSubPaths,
-      'delimiter': delimiter,
-    };
-  }
+abstract class StorageCategoryOptions
+    with AWSSerializable<Map<String, Object?>> {
+  /// {@macro amplify_core.storage.list_plugin_options}
+  const StorageCategoryOptions();
 }
