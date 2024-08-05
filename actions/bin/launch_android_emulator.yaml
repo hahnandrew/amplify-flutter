@@ -13,6 +13,7 @@ inputs:
   script:
     required: true
     description: The script to run once the emulator is booted.
+  emulator-boot-timeout: 6000
 runs:
   using: "node16"
   main: "dist/index.mjs"
