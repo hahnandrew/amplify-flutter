@@ -84,6 +84,7 @@ final class AvdManager {
             '-accel', 'on', // Fail if HW accel is unavailable
             '-no-snapshot',
             '-verbose',
+            '-wipe-data',
           ];
           final emulator = await processManager.start(
             [_emulator.exe, ...startAvdArgs],
