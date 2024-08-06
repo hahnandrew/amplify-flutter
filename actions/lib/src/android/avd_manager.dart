@@ -155,11 +155,7 @@ final class AvdManager {
         },
         () async {
           final bootRes = await _adb([
-            '-s',
-            'emulator-5554',
-            'shell',
-            'getprop',
-            'sys.boot_completed',
+            'devices',
           ]);
           if (bootRes.exitCode != 0) {
             throw _BootNotCompleted(bootRes.stderr as String);
